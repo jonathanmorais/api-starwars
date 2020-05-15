@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
 )
 
@@ -30,7 +31,7 @@ func dbConn() (db *sql.DB) {
 	dbDriver := "mysql"
 	dbUser := "root"
 	dbPass := "root"
-	dbName := "dbapi"
+	dbName := "starwars"
 	db, err := sql.Open(dbDriver, dbUser+":"+dbPass+"@/"+dbName)
 	if err != nil {
 		panic(err.Error())
@@ -78,14 +79,15 @@ func PlanetHandler(w http.ResponseWriter, r *http.Request) {
 
 
 	db := dbConn()
-	email := p.Email
-	comentario := p.Comentario
-	insForm, err := db.Prepare("INSERT INTO comentario(email, comentario) VALUES(?,?)")
+	nome := p.Nome
+	clima := p.Clima
+	terreno := p.Terreno
+	insForm, err := db.Prepare("INSERT INTO planet(nome, clima, terreno) VALUES(?,?,?)")
 	if err != nil {
 		panic(err.Error())
 	}
-	insForm.Exec(email, comentario)
-	log.Println("INSERT: Email: " + email + " | Comentario: " + comentario)
+	insForm.Exec(nome, clima, terreno)
+	log.Println("INSERT: Nome: " + nome + " | Clima: " + clima + " | Terreno: " + terreno)
 
 	defer db.Close()
 	http.Redirect(w, r, "/", 301)
