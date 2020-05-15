@@ -22,6 +22,8 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/", HomeHandler).Methods("GET")
 	r.HandleFunc("/planet", PlanetHandler).Methods("POST")
+	r.HandleFunc("/listplanet", ListAllPlanet).Methods("GET")
+	r.HandleFunc("/listplanetname", ListNamePlanet).Methods("POST")
 	http.Handle("/", r)
 	log.Fatal(http.ListenAndServe(":8090", r))
 
@@ -91,4 +93,66 @@ func PlanetHandler(w http.ResponseWriter, r *http.Request) {
 
 	defer db.Close()
 	http.Redirect(w, r, "/", 301)
+}
+
+
+
+func ListAllPlanet(w http.ResponseWriter, r *http.Request) {
+	db := dbConn()
+    rows, err := db.Query("SELECT nome FROM planet")
+    if err != nil {
+        panic(err.Error())
+	}
+	for rows.Next() {
+        var (
+            nome string
+        )
+        if err := rows.Scan(&nome); err != nil {
+            panic(err)
+        }
+        fmt.Printf("%v\n", nome)
+    }
+    if err := rows.Err(); err != nil {
+        panic(err)
+	}
+	
+	defer dbConn()
+
+}
+
+func ListNamePlanet(w http.ResponseWriter, r *http.Request) {
+	b, error := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+	if error != nil {
+		http.Error(w, error.Error(), 500)
+		return
+	}
+
+	var p Planet
+	err := json.Unmarshal(b, &p)
+	if err != nil {
+		fmt.Println("aqui 1")
+		log.Fatal(err)
+	}
+
+
+	db := dbConn()
+	pName := p
+    rows, err := db.Query("SELECT * FROM planet WHERE nome='?'", pName)
+    if err != nil {
+        panic(err.Error())
+	}
+	for rows.Next() {
+        var (
+            nome string
+        )
+        if err := rows.Scan(&nome); err != nil {
+            panic(err)
+        }
+        fmt.Printf("%v\n", nome)
+    }
+    if err := rows.Err(); err != nil {
+        panic(err)
+    } 
+
 }
