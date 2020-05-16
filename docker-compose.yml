@@ -17,3 +17,13 @@ services:
     volumes:
       - ${PWD}/volumes:/var/lib/mysql
       - ${PWD}/volumes/schemas:/docker-entrypoint-initdb.d
+  api:
+    container_name: api-starwars
+    build:
+      context: ./
+    ports: 
+      - 8090:8090
+    expose: 
+      - "8090"  
+    network_mode: host
+    restart: always
