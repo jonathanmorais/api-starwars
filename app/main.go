@@ -13,6 +13,7 @@ import (
 )
 
 type Planet struct {
+	Id      uint   `json:"id" sql:"AUTO_INCREMENT" gorm:"primary_key"`
 	Nome    string `json:"nome"`
 	Clima   string `json:"clima"`
 	Terreno string `json:"terreno"`
@@ -23,7 +24,7 @@ func main() {
 	r.HandleFunc("/", HomeHandler).Methods("GET")
 	r.HandleFunc("/planet", PlanetHandler).Methods("POST")
 	r.HandleFunc("/listplanet", ListAllPlanet).Methods("GET")
-	r.HandleFunc("/listplanetname", ListNamePlanet).Methods("POST")
+	r.HandleFunc("/listplanetname/{nome}", ListNamePlanet).Methods("GET")
 	http.Handle("/", r)
 	log.Fatal(http.ListenAndServe(":8090", r))
 
@@ -79,7 +80,6 @@ func PlanetHandler(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println(p)
 
-
 	db := dbConn()
 	nome := p.Nome
 	clima := p.Clima
@@ -95,64 +95,53 @@ func PlanetHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", 301)
 }
 
-
-
 func ListAllPlanet(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
 	db := dbConn()
-    rows, err := db.Query("SELECT nome FROM planet")
-    if err != nil {
-        panic(err.Error())
+	rows, err := db.Query("SELECT nome FROM planet")
+	if err != nil {
+		panic(err.Error())
 	}
+
+	var planet Planet
+
 	for rows.Next() {
-        var (
-            nome string
-        )
-        if err := rows.Scan(&nome); err != nil {
-            panic(err)
-        }
-        fmt.Printf("%v\n", nome)
-    }
-    if err := rows.Err(); err != nil {
-        panic(err)
+		var (
+			nome string
+		)
+		if err := rows.Scan(&nome); err != nil {
+			panic(err)
+		}
+		fmt.Printf("%v\n", nome)
 	}
-	
+	json.NewEncoder(w).Encode(planet)
+
+	if err := rows.Err(); err != nil {
+		panic(err)
+	}
+
 	defer dbConn()
 
 }
 
 func ListNamePlanet(w http.ResponseWriter, r *http.Request) {
-	b, error := ioutil.ReadAll(r.Body)
-	defer r.Body.Close()
-	if error != nil {
-		http.Error(w, error.Error(), 500)
-		return
-	}
-
-	var p Planet
-	err := json.Unmarshal(b, &p)
-	if err != nil {
-		fmt.Println("aqui 1")
-		log.Fatal(err)
-	}
-
-
+	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	params := mux.Vars(r)
+	var nome = params["nome"]
 	db := dbConn()
-	pName := p
-    rows, err := db.Query("SELECT * FROM planet WHERE nome='?'", pName)
-    if err != nil {
-        panic(err.Error())
+	result, err := db.Query("SELECT * FROM planet WHERE nome=?", nome)
+	if err != nil {
+		log.Panic(err)
 	}
-	for rows.Next() {
-        var (
-            nome string
-        )
-        if err := rows.Scan(&nome); err != nil {
-            panic(err)
-        }
-        fmt.Printf("%v\n", nome)
-    }
-    if err := rows.Err(); err != nil {
-        panic(err)
-    } 
 
+	var planet Planet
+	for result.Next() {
+		err := result.Scan(&planet.Id, &planet.Nome, &planet.Clima, &planet.Terreno)
+		if err != nil {
+			panic(err.Error())
+		}
+	}
+	json.NewEncoder(w).Encode(planet)
 }
