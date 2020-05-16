@@ -13,8 +13,11 @@ import (
 )
 
 type Api struct {
-	Name  string `json:"name"`
-	Films string `json:"films"`
+	Films []string `json:"films"`
+}
+
+type Film struct {
+	Title string `json:"title"`
 }
 
 type Planet struct {
@@ -31,7 +34,7 @@ func main() {
 	r.HandleFunc("/planet", PlanetHandler).Methods("POST")
 	r.HandleFunc("/listplanet", ListAllPlanet).Methods("GET")
 	r.HandleFunc("/listplanetname/{nome}", ListNamePlanet).Methods("GET")
-	r.HandleFunc("/listplanetid/{id}", ListIdPlanet).Methods("GET")
+	r.HandleFunc("/listplanetid/{id}/", ListIdPlanet).Methods("GET")
 	r.HandleFunc("/deleteplanet/{id}", RemovePlanet).Methods("DELETE")
 	http.Handle("/", r)
 	log.Fatal(http.ListenAndServe(":8090", r))
@@ -157,6 +160,8 @@ func ListNamePlanet(w http.ResponseWriter, r *http.Request) {
 }
 
 func ListIdPlanet(w http.ResponseWriter, r *http.Request) {
+	url := "https://swapi.dev/api/planets/"
+
 	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 	params := mux.Vars(r)
@@ -174,7 +179,20 @@ func ListIdPlanet(w http.ResponseWriter, r *http.Request) {
 			panic(err.Error())
 		}
 	}
+
+	resp, err := http.Get(url + id + "/")
+
+	var api Api
+
+	b, err := ioutil.ReadAll(resp.Body)
+	error := json.Unmarshal(b, &api)
+	if error != nil {
+		log.Panic(error)
+	}
+
 	json.NewEncoder(w).Encode(planet)
+	json.NewEncoder(w).Encode(api)
+
 }
 
 func RemovePlanet(w http.ResponseWriter, r *http.Request) {
@@ -191,23 +209,4 @@ func RemovePlanet(w http.ResponseWriter, r *http.Request) {
 		panic(err.Error())
 	}
 	fmt.Fprintf(w, "Planet with ID = %s was deleted", params["id"])
-}
-
-func GetApiSW(w http.ResponseWriter, r *http.Request) {
-	// get api
-	resp, err := http.Get("https://swapi.dev/api/")
-	if err != nil {
-		log.Panic(err)
-	}
-
-	defer resp.Body.Close()
-
-	var api Api
-	body, err := ioutil.ReadAll(resp.Body)
-	error := json.Unmarshal(body, &api)
-	if error != nil {
-		fmt.Println("aqui 3")
-		log.Fatal(err)
-	}
-	json.NewEncoder(w).Encode(api)
 }
