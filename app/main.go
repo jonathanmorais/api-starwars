@@ -12,6 +12,11 @@ import (
 	"github.com/gorilla/mux"
 )
 
+type Api struct {
+	Name  string `json:"name"`
+	Films string `json:"films"`
+}
+
 type Planet struct {
 	Id      uint   `json:"id" sql:"AUTO_INCREMENT" gorm:"primary_key"`
 	Nome    string `json:"nome"`
@@ -19,12 +24,15 @@ type Planet struct {
 	Terreno string `json:"terreno"`
 }
 
+// main Star Wars Planet Search
 func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/", HomeHandler).Methods("GET")
 	r.HandleFunc("/planet", PlanetHandler).Methods("POST")
 	r.HandleFunc("/listplanet", ListAllPlanet).Methods("GET")
 	r.HandleFunc("/listplanetname/{nome}", ListNamePlanet).Methods("GET")
+	r.HandleFunc("/listplanetid/{id}", ListIdPlanet).Methods("GET")
+	r.HandleFunc("/deleteplanet/{id}", RemovePlanet).Methods("DELETE")
 	http.Handle("/", r)
 	log.Fatal(http.ListenAndServe(":8090", r))
 
@@ -143,5 +151,63 @@ func ListNamePlanet(w http.ResponseWriter, r *http.Request) {
 			panic(err.Error())
 		}
 	}
+
 	json.NewEncoder(w).Encode(planet)
+
+}
+
+func ListIdPlanet(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	params := mux.Vars(r)
+	var id = params["id"]
+	db := dbConn()
+	result, err := db.Query("SELECT * FROM planet WHERE id=?", id)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	var planet Planet
+	for result.Next() {
+		err := result.Scan(&planet.Id, &planet.Nome, &planet.Clima, &planet.Terreno)
+		if err != nil {
+			panic(err.Error())
+		}
+	}
+	json.NewEncoder(w).Encode(planet)
+}
+
+func RemovePlanet(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	params := mux.Vars(r)
+	db := dbConn()
+	stmt, err := db.Prepare("DELETE FROM planet WHERE id = ?")
+	if err != nil {
+		panic(err.Error())
+	}
+	_, err = stmt.Exec(params["id"])
+	if err != nil {
+		panic(err.Error())
+	}
+	fmt.Fprintf(w, "Planet with ID = %s was deleted", params["id"])
+}
+
+func GetApiSW(w http.ResponseWriter, r *http.Request) {
+	// get api
+	resp, err := http.Get("https://swapi.dev/api/")
+	if err != nil {
+		log.Panic(err)
+	}
+
+	defer resp.Body.Close()
+
+	var api Api
+	body, err := ioutil.ReadAll(resp.Body)
+	error := json.Unmarshal(body, &api)
+	if error != nil {
+		fmt.Println("aqui 3")
+		log.Fatal(err)
+	}
+	json.NewEncoder(w).Encode(api)
 }
