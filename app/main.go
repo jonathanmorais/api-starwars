@@ -50,7 +50,7 @@ func dbConn() (db *sql.DB) {
 	if err != nil {
 		panic(err.Error())
 	} else {
-		fmt.Println("Conectou Suave")
+		fmt.Println("DB Up")
 	}
 
 	err = db.Ping()
@@ -77,7 +77,6 @@ func PlanetHandler(w http.ResponseWriter, r *http.Request) {
 	var p Planet
 	err := json.Unmarshal(b, &p)
 	if err != nil {
-		fmt.Println("aqui 2")
 		log.Fatal(err)
 	}
 
