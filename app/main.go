@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"github.com/jonathanmorais/api-starwars/routes"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
@@ -11,12 +12,12 @@ import (
 // main Star Wars Planet Search
 func main() {
 	r := mux.NewRouter()
-	r.HandleFunc("/", HomeHandler).Methods("GET")
-	r.HandleFunc("/planet", PlanetHandler).Methods("POST")
-	r.HandleFunc("/listplanet", ListAllPlanet).Methods("GET")
-	r.HandleFunc("/listplanetname/{nome}", ListNamePlanet).Methods("GET")
-	r.HandleFunc("/listplanetid/{id}/", ListIdPlanet).Methods("GET")
-	r.HandleFunc("/deleteplanet/{id}", RemovePlanet).Methods("DELETE")
+	r.HandleFunc("/", route.HomeHandler).Methods("GET")
+	r.HandleFunc("/planet", route.PlanetHandler).Methods("POST")
+	r.HandleFunc("/listplanet", route.ListAllPlanet).Methods("GET")
+	r.HandleFunc("/listplanetname/{nome}", route.ListNamePlanet).Methods("GET")
+	r.HandleFunc("/listplanetid/{id}/", route.ListIdPlanet).Methods("GET")
+	r.HandleFunc("/deleteplanet/{id}", route.RemovePlanet).Methods("DELETE")
 	http.Handle("/", r)
 	log.Fatal(http.ListenAndServe(":8090", r))
 

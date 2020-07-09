@@ -7,8 +7,6 @@ import (
 	"log"
 	"net/http"
 	"github.com/jonathanmorais/api-starwars/database"
-
-
 	"github.com/gorilla/mux"
 )
 
