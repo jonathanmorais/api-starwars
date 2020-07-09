@@ -1,27 +1,15 @@
-#build stage
-FROM golang:1.13 AS build-env
+FROM golang:alpine
 
-LABEL maintainer="Jonathan Morais <jonathan.m.lucena@gmail.com>"
+RUN mkdir /src
 
-WORKDIR /go/src/app/
+ADD . /src/
 
-#install dependecies
-RUN go get github.com/gorilla/mux && \
-    go get github.com/go-sql-driver/mysql
+WORKDIR /src/app
 
-#copy to workdir path
-COPY ./app/main.go .
+RUN go build -o main .
 
-ENV CGO_ENABLED=0
+RUN adduser -S -D -H -h /app appuser
 
-#build the go app
-RUN GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -o app .
+USER appuser
 
-# final stage
-FROM alpine
-RUN apk --no-cache add ca-certificates
-WORKDIR /app/
-
-#copy the compilate binary for workdir
-COPY --from=build-env /go/src/app .
-ENTRYPOINT ["./app"]
+CMD ["./main"]
