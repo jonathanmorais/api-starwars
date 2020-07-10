@@ -2,7 +2,6 @@ package database
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -12,12 +11,13 @@ func DbConn() (db *sql.DB) {
 	dbDriver := "mysql"
 	dbUser := "root"
 	dbPass := "root"
-	dbName := "cosmos"
+	dbName := "starwars"
 	db, err := sql.Open(dbDriver, dbUser+":"+dbPass+"@/"+dbName)
 	if err != nil {
-		log.Panic(err)
+		log.Print(err)
+
 	} else {
-		fmt.Println("DB Up")
+		log.Print("DB Up")
 	}
 
 	err = db.Ping()

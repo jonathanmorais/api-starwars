@@ -10,7 +10,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type Api struct {
+type All struct {
 	Films []string `json:"films"`
 }
 
@@ -145,16 +145,17 @@ func ListIdPlanet(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := http.Get(url + id + "/")
 
-	var api Api
+	var all All
 
 	b, err := ioutil.ReadAll(resp.Body)
-	error := json.Unmarshal(b, &api)
+	error := json.Unmarshal(b, &all)
+
 	if error != nil {
 		log.Panic(error)
 	}
 
 	json.NewEncoder(w).Encode(planet)
-	json.NewEncoder(w).Encode(api)
+	json.NewEncoder(w).Encode(len(all.Films))
 
 }
 
