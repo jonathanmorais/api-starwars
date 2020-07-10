@@ -52,8 +52,6 @@ func PlanetHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
 	w.Write(output)
 
-	fmt.Println(p)
-
 	db := database.DbConn()
 	nome := p.Nome
 	clima := p.Clima
@@ -75,7 +73,7 @@ func ListAllPlanet(w http.ResponseWriter, r *http.Request) {
 	db := database.DbConn()
 	rows, err := db.Query("SELECT nome FROM planet")
 	if err != nil {
-		panic(err.Error())
+		log.Print(err)
 	}
 
 	var planet Planet
@@ -87,7 +85,6 @@ func ListAllPlanet(w http.ResponseWriter, r *http.Request) {
 		if err := rows.Scan(&nome); err != nil {
 			panic(err)
 		}
-		fmt.Printf("%v\n", nome)
 	}
 	json.NewEncoder(w).Encode(planet)
 
@@ -114,7 +111,7 @@ func ListNamePlanet(w http.ResponseWriter, r *http.Request) {
 	for result.Next() {
 		err := result.Scan(&planet.Id, &planet.Nome, &planet.Clima, &planet.Terreno)
 		if err != nil {
-			panic(err.Error())
+			log.Print(err)
 		}
 	}
 
@@ -132,14 +129,14 @@ func ListIdPlanet(w http.ResponseWriter, r *http.Request) {
 	db := database.DbConn()
 	result, err := db.Query("SELECT * FROM planet WHERE id=?", id)
 	if err != nil {
-		log.Panic(err)
+		log.Print(err)
 	}
 
 	var planet Planet
 	for result.Next() {
 		err := result.Scan(&planet.Id, &planet.Nome, &planet.Clima, &planet.Terreno)
 		if err != nil {
-			panic(err.Error())
+			log.Print(err)
 		}
 	}
 
@@ -151,7 +148,7 @@ func ListIdPlanet(w http.ResponseWriter, r *http.Request) {
 	error := json.Unmarshal(b, &all)
 
 	if error != nil {
-		log.Panic(error)
+		log.Print(error)
 	}
 
 	json.NewEncoder(w).Encode(planet)
@@ -166,11 +163,11 @@ func RemovePlanet(w http.ResponseWriter, r *http.Request) {
 	db := database.DbConn()
 	stmt, err := db.Prepare("DELETE FROM planet WHERE id = ?")
 	if err != nil {
-		panic(err.Error())
+		log.Print(err)
 	}
 	_, err = stmt.Exec(params["id"])
 	if err != nil {
-		panic(err.Error())
+		log.Print(err)
 	}
 	fmt.Fprintf(w, "Planet with ID = %s was deleted", params["id"])
 }

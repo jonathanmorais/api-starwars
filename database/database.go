@@ -7,14 +7,15 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-func DbConn() (db *sql.DB) {
+func DbConn() (db *sql.DB){
 	dbDriver := "mysql"
 	dbUser := "root"
 	dbPass := "root"
 	dbName := "starwars"
 	db, err := sql.Open(dbDriver, dbUser+":"+dbPass+"@/"+dbName)
 	if err != nil {
-		log.Print(err)
+		log.Print("500")
+		log.Fatal(err)
 
 	} else {
 		log.Print("DB Up")
