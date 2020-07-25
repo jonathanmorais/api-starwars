@@ -2,9 +2,8 @@ package database
 
 import (
 	"database/sql"
-	"log"
-
 	_ "github.com/go-sql-driver/mysql"
+	"log"
 )
 
 func DbConn() (db *sql.DB){
@@ -14,13 +13,9 @@ func DbConn() (db *sql.DB){
 	dbName := "starwars"
 	db, err := sql.Open(dbDriver, dbUser+":"+dbPass+"@/"+dbName)
 	if err != nil {
-		log.Print("500")
-		log.Fatal(err)
-
-	} else {
-		log.Print("DB Up")
+		log.Fatal(500, err)
+        return
 	}
-
 	err = db.Ping()
 	if err != nil {
 		panic(err.Error()) // proper error handling instead of panic in your app

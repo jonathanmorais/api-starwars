@@ -27,14 +27,16 @@ type Planet struct {
 
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
-	log.Println("suave")
+
 }
 
-func PlanetHandler(w http.ResponseWriter, r *http.Request) {
+func InsertPlanet(w http.ResponseWriter, r *http.Request) {
 	b, error := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
+
 	if error != nil {
-		http.Error(w, error.Error(), 500)
+		w.WriteHeader(http.StatusBadRequest)
+		log.Print(error)
 		return
 	}
 
@@ -96,7 +98,7 @@ func ListAllPlanet(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func ListNamePlanet(w http.ResponseWriter, r *http.Request) {
+func GetNamePlanet(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 	params := mux.Vars(r)
@@ -119,7 +121,7 @@ func ListNamePlanet(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func ListIdPlanet(w http.ResponseWriter, r *http.Request) {
+func GetIdPlanet(w http.ResponseWriter, r *http.Request) {
 	url := "https://swapi.dev/api/planets/"
 
 	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
