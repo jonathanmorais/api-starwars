@@ -1,0 +1,32 @@
+stages:
+    - infra
+    - build
+    - deploy
+
+infra:
+    image:
+      name: hashicorp/terraform:0.12.21
+      entrypoint: [""]
+    stage: infra
+    script:
+      - cd infra
+      - terraform init
+      - terraform apply -auto-approve
+    only:
+    - rebase
+
+build:
+    stage: build
+    script:
+        - cd docker
+        - docker build -t jonathan99/api-starwars-image -f Dockerfile ..
+        - docker push jonathan99/api-starwars-image:${CI_TAG}
+    only:
+        - rebase
+
+deploy:
+    stage: deploy
+    image: docker-awscli-dind
+    script:
+        - ssh <username>@<ip-host>
+        - docker run -it --name api-starwars -p 8090:8090 jonathan99/api-starwars-image:${CI_TAG}
