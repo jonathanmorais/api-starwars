@@ -20,13 +20,6 @@ build:
     script:
         - cd docker
         - docker build -t jonathan99/api-starwars-image -f Dockerfile ..
-        - docker push jonathan99/api-starwars-image:${CI_TAG}
+        - docker push jonathan99/api-starwars-image
     only:
         - rebase
-
-deploy:
-    stage: deploy
-    image: docker-awscli-dind
-    script:
-        - ssh <username>@<ip-host>
-        - docker run -it --name api-starwars -p 8090:8090 jonathan99/api-starwars-image:${CI_TAG}

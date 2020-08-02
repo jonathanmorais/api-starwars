@@ -1,10 +1,10 @@
 FROM golang:alpine
 
-RUN mkdir /src
+RUN mkdir /app
 
-ADD . /src/
+COPY . /app
 
-WORKDIR /src/cmd
+WORKDIR /app/cmd
 
 RUN go build -o main .
 
